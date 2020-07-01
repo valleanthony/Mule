@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns:http="http://www.mulesoft.org/schema/mule/http"
 	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd">
 	<configuration-properties doc:name="Configuration properties" doc:id="acea6685-e2cd-457c-9ffd-db70e7694e1a" file="config.yaml" />
@@ -18,4 +20,22 @@ http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/
 		</wsc:connection>
 	</wsc:config>
 	<configuration doc:name="Configuration" doc:id="ff950c9e-4ba5-4d28-9ef7-ffb7f9ccbe57" defaultErrorHandler-ref="ImplementationError_Handler" />
+	<error-handler name="globalError_Handler" doc:id="a30735d2-98df-4e57-85d8-212e06b0f34a">
+	
+	<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="cc604f55-fcdb-40d5-995f-013f5dd130b4" type="APP:INVALID_DESTINANTION">
+				<ee:transform doc:name="Transform Message" doc:id="d78bc45b-c697-4483-87f6-c948f92941d3" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="400" doc:name="httpStatus" doc:id="6548f848-d056-4eaa-a1b9-cd196fea92a4" variableName="httpStatus"/>
+			</on-error-continue>
+	
+	
+	</error-handler>
 </mule>
