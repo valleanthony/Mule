@@ -82,6 +82,41 @@ output application/json
 			</on-error-continue>
 		</error-handler>
 	</flow>
+	<flow name="postFlight" doc:id="381c9657-2dba-412f-8575-6163e47b0e4a" >
+		<ee:transform doc:name="Transform Message" doc:id="57cb1753-4872-4cea-ba62-c235d3cd901a" >
+			<ee:message >
+				<ee:set-payload resource="json_flight_playground.dwl" />
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="DWoutput" ><![CDATA[%dw 2.0
+output application/xml	
+---
+data:{
+	hub:"MUA",
+	flight @(airline: payload.airline):{
+		code:payload.toAirportCode,
+	}
+	
+	
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="3a9eb36b-59b2-4322-a35a-4f306ebd495e" message="#[vars.DWoutput]"/>
+	</flow>
+	<flow name="ImplementationFlow" doc:id="af712bb3-ed70-4648-beb8-e140e1d4012f" >
+		<http:listener doc:name="POST / multipleflights" doc:id="8d33f1ad-903c-470b-87ba-46faa6ed1de4" config-ref="HTTP_Listener_config" path="/multipleflights" allowedMethods="POST"/>
+		<ee:transform doc:name="Transform Message" doc:id="b8b3dde9-d9fd-4ef8-af55-b9ca38670468" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+flights: payload map (object,index)->{
+	'flight $(index)': object
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="d29946f8-4a26-406f-b52b-bcbaf7f053dc" />
+	</flow>
 	<flow name="getDletaFlights" doc:id="06945bd0-3657-4a20-84ba-414477608361" >
 		<ee:transform doc:name="Transform Message" doc:id="aa3ae8c7-4a59-4333-a83e-f8c60e84757a" >
 			<ee:message >
