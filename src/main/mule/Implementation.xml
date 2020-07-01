@@ -67,8 +67,8 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="5f34ccda-0f06-4410-8975-e8170557c394" message="#[message.payload]"/>
 		<error-handler >
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="Copy_of_On Error Propagate" doc:id="bbca08cb-771d-4517-8e80-54c5859b648d" type="AMERICAN-FLIGHTS-API:BAD_REQUEST" >
-				<ee:transform doc:name="Copy_of_Transform Message" doc:id="9af01333-e9f9-4c44-bd3e-99ab623be729" >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="Copy_of_On Error Propagate" doc:id="bbca08cb-771d-4517-8e80-54c5859b648d" type="AMERICAN-FLIGHTS-API:BAD_REQUEST" >
+				<ee:transform doc:name="On Error Continue" doc:id="9af01333-e9f9-4c44-bd3e-99ab623be729" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -79,7 +79,7 @@ output application/json
 					</ee:message>
 				</ee:transform>
 				<set-variable value="200" doc:name="Copy_of_httpStatus" doc:id="ac4da12b-791c-416b-b753-fcc1af04d43f" variableName="httpStatus" />
-			</on-error-propagate>
+			</on-error-continue>
 		</error-handler>
 	</flow>
 	<flow name="getDletaFlights" doc:id="06945bd0-3657-4a20-84ba-414477608361" >
@@ -147,32 +147,6 @@ payload.flights map ( flight , indexOfFlight ) -> {
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="e426005d-2f00-481e-ad87-fc76178ee5a8" />
 	</flow>
-	<error-handler name="ImplementationError_Handler" doc:id="93539861-2ae0-438e-9a8b-5865b312f2b3" >
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="2c6fd076-3d17-404c-976b-56395a4ea81a" type="WSC:CONNECTIVITY,WSC:INVALID_WSDL">
-			<ee:transform doc:name="data unavailable" doc:id="f172aed7-38c6-41cc-88d4-71da78eafada">
-				<ee:message>
-					<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-	"message" : "data unavailable " ++ error.description as String
-}]]></ee:set-payload>
-				</ee:message>
-			</ee:transform>
-		</on-error-propagate>
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d1f17271-59f2-471d-888f-1504c8fb0208" type="ANY">
-			<ee:transform doc:name="any" doc:id="a1e413cb-55a1-4d29-bc44-1df3152ff35b">
-				<ee:message>
-					<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-	"message":error.description
-}]]></ee:set-payload>
-				</ee:message>
-			</ee:transform>
-		</on-error-propagate>
-	</error-handler>
 	<flow name="getAllAirlineFlights" doc:id="71d908e1-5006-470a-a2fc-b0b34d364d70">
 		<scatter-gather doc:name="Scatter-Gather" doc:id="4fc0ed20-230d-4a60-ba3f-5f656195bcd9">
 			<route>

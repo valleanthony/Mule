@@ -16,14 +16,17 @@ http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/
 	</http:request-config>
 	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="20f02649-4c28-42a9-ae6d-a4e986f6e9ac" >
 		<wsc:connection wsdlLocation="${delta.wsdl}" service="${delta.service}" port="${delta.port}" >
+			<reconnection >
+				<reconnect />
+			</reconnection>
 			<wsc:web-service-security actor="http://schemas.xmlsoap.org/soap/actor/next" />
 		</wsc:connection>
 	</wsc:config>
-	<configuration doc:name="Configuration" doc:id="ff950c9e-4ba5-4d28-9ef7-ffb7f9ccbe57" defaultErrorHandler-ref="ImplementationError_Handler" />
+	<configuration doc:name="Configuration" doc:id="ff950c9e-4ba5-4d28-9ef7-ffb7f9ccbe57"  />
 	<error-handler name="globalError_Handler" doc:id="a30735d2-98df-4e57-85d8-212e06b0f34a">
 	
 	<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="cc604f55-fcdb-40d5-995f-013f5dd130b4" type="APP:INVALID_DESTINANTION">
-				<ee:transform doc:name="Transform Message" doc:id="d78bc45b-c697-4483-87f6-c948f92941d3" >
+				<ee:transform doc:name="On Error Continue" doc:id="d78bc45b-c697-4483-87f6-c948f92941d3" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -35,6 +38,32 @@ output application/json
 				</ee:transform>
 				<set-variable value="400" doc:name="httpStatus" doc:id="6548f848-d056-4eaa-a1b9-cd196fea92a4" variableName="httpStatus"/>
 			</on-error-continue>
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="c8aa28ea-cd6f-4fc1-a171-22780bcd9dbb" type="WSC:CONNECTIVITY,WSC:INVALID_WSDL" >
+			<ee:transform doc:name="Copy_of_data unavailable" doc:id="2cc9fa23-e13e-421b-8284-5fda7a82f229" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message" : "data unavailable " ++ error.description as String
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-variable value="500" doc:name="httpStatus" doc:id="145d262a-08bd-4471-96de-38b71a2a9d44" variableName="httpStatus"/>
+		</on-error-continue>
+		<on-error-continue enableNotifications="true" logException="true" doc:name="Copy_of_On Error Propagate" doc:id="aed4b743-766d-49e5-9f46-741fba0f228d" type="ANY" >
+			<ee:transform doc:name="On error continue" doc:id="46df84fd-2264-4f69-893e-5126cd63d421" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":error.description
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-variable value="500" doc:name="httpStatus" doc:id="5b8d12d9-af9e-412f-a07c-51cf19f2920b" variableName="httpStatus"/>
+		</on-error-continue>
 	
 	
 	</error-handler>
